@@ -3,6 +3,7 @@
     "proto.h": "c",
     "proc.h": "c",
     "global.h": "c",
-    "type.h": "c"
+    "type.h": "c",
+    "const.h": "c"
   }
 }

@@ -15,6 +15,8 @@ EXTERN int ticks;
 
 EXTERN int mode;
 EXTERN int readCount;
+EXTERN int writeCount;
+EXTERN int isBlockedF;
 
 EXTERN int disp_pos;
 EXTERN u8 gdt_ptr[6]; // 0~15:Limit  16~47:Base
@@ -37,5 +39,15 @@ extern int sleep_size;
 
 extern SEMAPHORE rmutex;
 extern SEMAPHORE wmutex;
+extern SEMAPHORE rw_mutex;
 extern SEMAPHORE nr_readers;
-extern SEMAPHORE S; //S为互斥信号量
+extern SEMAPHORE r;
+extern SEMAPHORE w;
+extern SEMAPHORE queue;
+
+extern int schedulable_queue[];
+extern int schedulable_queue_size;
+
+void push(int);
+void remove(int);
+int find();

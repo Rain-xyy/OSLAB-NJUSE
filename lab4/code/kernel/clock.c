@@ -18,7 +18,7 @@
 PUBLIC void clock_handler(int irq)
 {
         ticks++;
-        p_proc_ready->ticks--;
+        /* p_proc_ready->ticks--; */
 
         if (k_reenter != 0)
         {
@@ -30,7 +30,19 @@ PUBLIC void clock_handler(int irq)
                 if (proc_table[i].sleep_time > 0)
                 {
                         proc_table[i].sleep_time--;
+                        if (proc_table[i].sleep_time == 0)
+                        {
+                                //移入可调度队列
+                                push(proc_table[i].pid);
+                        }
                 }
+        }
+
+        if (ticks % 50 == 0)
+        {
+                p_proc_ready = proc_table + NR_TASKS - 1; //选中F进程
+                isBlockedF = 0;
+                return;
         }
 
         schedule();

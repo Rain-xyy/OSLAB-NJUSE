@@ -54,10 +54,6 @@ PUBLIC int kernel_main()
 		selector_ldt += 1 << 3;
 	}
 
-	/* proc_table[0].ticks = proc_table[0].priority = 1500;
-	proc_table[1].ticks = proc_table[1].priority = 1500;
-	proc_table[2].ticks = proc_table[2].priority = 1500; */
-
 	//todo
 	//初始时都可以被分配时间片
 	for (int i = 0; i < NR_TASKS; i++)
@@ -73,13 +69,15 @@ PUBLIC int kernel_main()
 	proc_table[2].color = 0x04;
 	proc_table[3].color = 0x06;
 	proc_table[4].color = 0x0d;
-	proc_table[5].color = 0x0e;
+	proc_table[5].color = 0x07; //F进程用白色就好
 
 	k_reenter = 0;
 	ticks = 0;
 
 	mode = 0; //可调整
 	readCount = 0;
+	writeCount = 0;
+	isBlockedF = 0;
 
 	p_proc_ready = proc_table;
 
@@ -100,11 +98,7 @@ void atomicP(SEMAPHORE *s)
 {
 	//disable_irq(CLOCK_IRQ);
 	disable_int();
-	/* disp_str(p_proc_ready->p_name);
-	disp_str(" tyr to P\n"); */
 	P(s);
-	/* disp_str(p_proc_ready->p_name);
-	disp_str(" success to P\n"); */
 	enable_int();
 	//enable_irq(CLOCK_IRQ);
 }
@@ -113,11 +107,7 @@ void atomicV(SEMAPHORE *s)
 {
 	//disable_irq(CLOCK_IRQ);
 	disable_int();
-	/* disp_str(p_proc_ready->p_name);
-	disp_str(" tyr to V\n"); */
 	V(s);
-	/* disp_str(p_proc_ready->p_name);
-	disp_str(" success to V\n"); */
 	enable_int();
 	//enable_irq(CLOCK_IRQ);
 }
@@ -126,14 +116,10 @@ void disp_read_start()
 {
 	disable_int();
 
-	//打印读开始的信息
-	//disp_int(rmutex.value);
-
 	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
 	disp_color_str(" ", p_proc_ready->color);
 	disp_color_str("starts reading\n", p_proc_ready->color);
-	/* disp_str(p_proc_ready->p_name);
-	disp_str(" starts reading\n"); */
+
 	enable_int();
 }
 
@@ -144,11 +130,26 @@ disp_read_end()
 	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
 	disp_color_str(" ", p_proc_ready->color);
 	disp_color_str("ends reading\n", p_proc_ready->color);
-	/* disp_str(p_proc_ready->p_name);
-	disp_str(" ends reading\n"); */
+
 	enable_int();
 }
 
+disp_write_start()
+{
+	disable_int();
+	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
+	disp_color_str(" begins writing\n", p_proc_ready->color);
+	enable_int();
+}
+
+disp_write_end()
+{
+	disable_int();
+
+	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
+	disp_color_str(" ends writing\n", p_proc_ready->color);
+	enable_int();
+}
 /*======================================================================*
                                read
  *======================================================================*/
@@ -157,28 +158,82 @@ void read(int slices)
 	if (mode == 0)
 	{ //读者优先
 
+		atomicP(&nr_readers);
 		atomicP(&rmutex);
 		if (readCount == 0)
 		{
-			atomicP(&wmutex); //有进程在读的时候不让其它进程写
+
+			atomicP(&rw_mutex); //有进程在读的时候不让其它进程写
 		}
 		readCount++;
 		atomicV(&rmutex);
 
-		atomicP(&nr_readers);
 		disp_read_start();
 		//读操作消耗的时间片
 		milli_delay(slices * TIMESLICE);
+
 		disp_read_end();
-		atomicV(&nr_readers);
 
 		atomicP(&rmutex);
 		readCount--;
 		if (readCount == 0)
 		{
-			atomicV(&wmutex);
+			atomicV(&rw_mutex);
 		}
 		atomicV(&rmutex);
+		atomicV(&nr_readers);
+	}
+	else if (mode == 1)
+	{
+		P(&queue);
+		P(&r);
+		P(&rmutex);
+		if (readCount == 0)
+		{
+			P(&w);
+		}
+		V(&rmutex);
+		V(&r);
+		V(&queue);
+	}
+}
+
+void write(int slices)
+{
+	if (mode == 0)
+	{
+		//读者优先
+		atomicP(&rw_mutex);
+		writeCount++;
+		disp_write_start();
+		milli_delay(slices * TIMESLICE);
+		disp_write_end();
+		writeCount--;
+		atomicV(&rw_mutex);
+	}
+	else if (mode == 1)
+	{
+		P(&wmutex);
+		if (writeCount == 0)
+		{
+			P(&r); //申请r锁
+		}
+		writeCount++;
+		V(&wmutex);
+
+		P(&w);
+		disp_write_start();
+		milli_delay(slices * TIMESLICE);
+		disp_write_end();
+		V(&w);
+
+		P(&wmutex);
+		writeCount--;
+		if (writeCount == 0)
+		{
+			V(&r);
+		}
+		V(&wmutex);
 	}
 }
 
@@ -190,6 +245,10 @@ void ReadA()
 	while (1)
 	{
 		read(2);
+		if (mode == 0)
+		{
+			//delay_milli_seconds(50);
+		}
 	}
 }
 
@@ -201,6 +260,10 @@ void ReadB()
 	while (1)
 	{
 		read(3);
+		if (mode == 0)
+		{
+			//delay_milli_seconds(50);
+		}
 	}
 }
 
@@ -212,6 +275,10 @@ void ReadC()
 	while (1)
 	{
 		read(3);
+		if (mode == 0)
+		{
+			//delay_milli_seconds(50);
+		}
 	}
 }
 
@@ -222,6 +289,7 @@ void WriteD()
 {
 	while (1)
 	{
+		write(3);
 	}
 }
 
@@ -232,6 +300,7 @@ void WriteE()
 {
 	while (1)
 	{
+		write(4);
 	}
 }
 
@@ -242,5 +311,24 @@ void F()
 {
 	while (1)
 	{
+		if (!isBlockedF)
+		{
+			if (readCount != 0)
+			{
+				disp_int(readCount);
+				disp_str(" process is reading\n");
+			}
+			else if (writeCount != 0)
+			{
+				disp_int(writeCount);
+				disp_str(" process is writing\n");
+			}
+			else
+			{
+				disp_str("neither process is writing nor writing!\n");
+			}
+
+			isBlockedF = 1;
+		}
 	}
 }
