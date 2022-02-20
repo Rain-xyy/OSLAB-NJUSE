@@ -1,0 +1,15 @@
+{
+  "files.associations": {
+    "malloc.h": "c",
+    "proto.h": "c",
+    "type.h": "c",
+    "const.h": "c",
+    "protect.h": "c",
+    "tty.h": "c",
+    "console.h": "c",
+    "proc.h": "c",
+    "global.h": "c",
+    "keyboard.h": "c"
+  },
+  "cmake.configureOnOpen": false
+}

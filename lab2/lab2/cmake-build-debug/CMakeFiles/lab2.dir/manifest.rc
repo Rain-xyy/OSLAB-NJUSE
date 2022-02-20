@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "G:/share/lab2/lab2/cmake-build-debug/CMakeFiles/lab2.dir/embed.manifest"

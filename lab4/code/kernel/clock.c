@@ -38,13 +38,6 @@ PUBLIC void clock_handler(int irq)
                 }
         }
 
-        if (ticks % 50 == 0)
-        {
-                p_proc_ready = proc_table + NR_TASKS - 1; //选中F进程
-                isBlockedF = 0;
-                return;
-        }
-
         schedule();
 }
 

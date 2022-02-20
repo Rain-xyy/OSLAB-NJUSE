@@ -12,6 +12,7 @@
 #endif
 
 EXTERN int ticks;
+EXTERN int lastTicks;
 
 EXTERN int mode;
 EXTERN int readCount;
@@ -45,9 +46,13 @@ extern SEMAPHORE r;
 extern SEMAPHORE w;
 extern SEMAPHORE queue;
 
+extern SEMAPHORE specialMutex;
+
 extern int schedulable_queue[];
 extern int schedulable_queue_size;
 
 void push(int);
 void remove(int);
 int find();
+int numOfNotWorked();
+void reWork();

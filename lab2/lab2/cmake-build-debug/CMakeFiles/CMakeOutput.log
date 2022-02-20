@@ -1,0 +1,73 @@
+The system is: Windows - 10.0.19043 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: D:/VisualStudio2017/vs/VC/Tools/MSVC/14.16.27023/bin/Hostx86/x86/cl.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+用于 x86 的 Microsoft (R) C/C++ 优化编译器 19.16.27045 版
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+CMakeCCompilerId.c
+Microsoft (R) Incremental Linker Version 14.16.27045.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCCompilerId.exe 
+CMakeCCompilerId.obj 
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.exe"
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.obj"
+
+The C compiler identification is MSVC, found in "G:/share/lab2/lab2/cmake-build-debug/CMakeFiles/3.19.2/CompilerIdC/CMakeCCompilerId.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: D:/VisualStudio2017/vs/VC/Tools/MSVC/14.16.27023/bin/Hostx86/x86/cl.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+用于 x86 的 Microsoft (R) C/C++ 优化编译器 19.16.27045 版
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+CMakeCXXCompilerId.cpp
+Microsoft (R) Incremental Linker Version 14.16.27045.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCXXCompilerId.exe 
+CMakeCXXCompilerId.obj 
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.exe"
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.obj"
+
+The CXX compiler identification is MSVC, found in "G:/share/lab2/lab2/cmake-build-debug/CMakeFiles/3.19.2/CompilerIdCXX/CMakeCXXCompilerId.exe"
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: G:/share/lab2/lab2/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):nmake /nologo cmTC_0e463\fast && 	D:\VisualStudio2017\vs\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\nmake.exe  -f CMakeFiles\cmTC_0e463.dir\build.make /nologo -L                  CMakeFiles\cmTC_0e463.dir\build
+Building C object CMakeFiles/cmTC_0e463.dir/CMakeCCompilerABI.c.obj
+	D:\VisualStudio2017\vs\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\cl.exe @C:\Users\XiaYu\AppData\Local\Temp\nm2286.tmp
+CMakeCCompilerABI.c
+Linking C executable cmTC_0e463.exe
+	D:\Jetbrains\apps\CLion\ch-0\211.6693.114\bin\cmake\win\bin\cmake.exe -E vs_link_exe --intdir=CMakeFiles\cmTC_0e463.dir --rc="D:\Windows Kits\10\bin\10.0.17763.0\x86\rc.exe" --mt="D:\Windows Kits\10\bin\10.0.17763.0\x86\mt.exe" --manifests -- D:\VisualStudio2017\vs\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\link.exe /nologo @CMakeFiles\cmTC_0e463.dir\objects1.rsp @C:\Users\XiaYu\AppData\Local\Temp\nm2314.tmp
+
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: G:/share/lab2/lab2/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):nmake /nologo cmTC_00d6d\fast && 	D:\VisualStudio2017\vs\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86\nmake.exe  -f CMakeFiles\cmTC_00d6d.dir\build.make /nologo -L                  CMakeFiles\cmTC_00d6d.dir\build
+Building CXX object CMakeFiles/cmTC_00d6d.dir/CMakeCXXCompilerABI.cpp.obj
+	D:\VisualStudio2017\vs\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\cl.exe @C:\Users\XiaYu\AppData\Local\Temp\nm2833.tmp
+CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTC_00d6d.exe
+	D:\Jetbrains\apps\CLion\ch-0\211.6693.114\bin\cmake\win\bin\cmake.exe -E vs_link_exe --intdir=CMakeFiles\cmTC_00d6d.dir --rc="D:\Windows Kits\10\bin\10.0.17763.0\x86\rc.exe" --mt="D:\Windows Kits\10\bin\10.0.17763.0\x86\mt.exe" --manifests -- D:\VisualStudio2017\vs\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\link.exe /nologo @CMakeFiles\cmTC_00d6d.dir\objects1.rsp @C:\Users\XiaYu\AppData\Local\Temp\nm28FF.tmp
+
+
+

@@ -61,6 +61,7 @@ PUBLIC int kernel_main()
 		proc_table[i].isWaiting = 0;
 		proc_table[i].sleep_time = 0;
 		proc_table[i].ticks = proc_table[2].priority = 10000;
+		proc_table[i].hasWorked = 0;
 	}
 
 	//分配颜色
@@ -73,6 +74,7 @@ PUBLIC int kernel_main()
 
 	k_reenter = 0;
 	ticks = 0;
+	lastTicks = 0;
 
 	mode = 0; //可调整
 	readCount = 0;
@@ -118,8 +120,17 @@ void disp_read_start()
 
 	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
 	disp_color_str(" ", p_proc_ready->color);
-	disp_color_str("starts reading\n", p_proc_ready->color);
+	disp_color_str("starts reading", p_proc_ready->color);
 
+	enable_int();
+}
+
+disp_reading()
+{
+	disable_int();
+	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
+	disp_color_str(" ", p_proc_ready->color);
+	disp_color_str("is reading", p_proc_ready->color);
 	enable_int();
 }
 
@@ -129,7 +140,7 @@ disp_read_end()
 	//打印读结束信息
 	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
 	disp_color_str(" ", p_proc_ready->color);
-	disp_color_str("ends reading\n", p_proc_ready->color);
+	disp_color_str("ends reading", p_proc_ready->color);
 
 	enable_int();
 }
@@ -138,7 +149,16 @@ disp_write_start()
 {
 	disable_int();
 	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
-	disp_color_str(" begins writing\n", p_proc_ready->color);
+	disp_color_str(" begins writing", p_proc_ready->color);
+	enable_int();
+}
+
+disp_writing()
+{
+	disable_int();
+	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
+	disp_color_str(" ", p_proc_ready->color);
+	disp_color_str("is writing", p_proc_ready->color);
 	enable_int();
 }
 
@@ -147,7 +167,7 @@ disp_write_end()
 	disable_int();
 
 	disp_color_str(p_proc_ready->p_name, p_proc_ready->color);
-	disp_color_str(" ends writing\n", p_proc_ready->color);
+	disp_color_str(" ends writing", p_proc_ready->color);
 	enable_int();
 }
 /*======================================================================*
@@ -158,7 +178,6 @@ void read(int slices)
 	if (mode == 0)
 	{ //读者优先
 
-		atomicP(&nr_readers);
 		atomicP(&rmutex);
 		if (readCount == 0)
 		{
@@ -168,11 +187,19 @@ void read(int slices)
 		readCount++;
 		atomicV(&rmutex);
 
+		atomicP(&nr_readers);
 		disp_read_start();
+
 		//读操作消耗的时间片
-		milli_delay(slices * TIMESLICE);
+		//milli_delay(slices * TIMESLICE);
+		for (int i = 0; i < slices; i++)
+		{
+			disp_reading();
+			milli_delay(TIMESLICE);
+		}
 
 		disp_read_end();
+		atomicV(&nr_readers);
 
 		atomicP(&rmutex);
 		readCount--;
@@ -181,20 +208,42 @@ void read(int slices)
 			atomicV(&rw_mutex);
 		}
 		atomicV(&rmutex);
-		atomicV(&nr_readers);
 	}
 	else if (mode == 1)
 	{
-		P(&queue);
+		//P(&queue); //增加queue信号量是为了防止r上有长队列，因为如果r上有长队列的话，如果有写进程，那么写进程要排很久的队
 		P(&r);
 		P(&rmutex);
 		if (readCount == 0)
 		{
 			P(&w);
 		}
+		readCount++;
 		V(&rmutex);
 		V(&r);
-		V(&queue);
+		//V(&queue);
+
+		atomicP(&nr_readers);
+		disp_read_start();
+
+		//读操作消耗的时间片
+		//milli_delay(slices * TIMESLICE);
+		for (int i = 0; i < slices; i++)
+		{
+			disp_reading();
+			milli_delay(TIMESLICE);
+		}
+
+		disp_read_end();
+		atomicV(&nr_readers);
+
+		atomicP(&rmutex);
+		readCount--;
+		if (readCount == 0)
+		{
+			atomicV(&w);
+		}
+		atomicV(&rmutex);
 	}
 }
 
@@ -206,7 +255,12 @@ void write(int slices)
 		atomicP(&rw_mutex);
 		writeCount++;
 		disp_write_start();
-		milli_delay(slices * TIMESLICE);
+		//milli_delay(slices * TIMESLICE);
+		for (int i = 0; i < slices; i++)
+		{
+			disp_writing();
+			milli_delay(TIMESLICE);
+		}
 		disp_write_end();
 		writeCount--;
 		atomicV(&rw_mutex);
@@ -223,7 +277,12 @@ void write(int slices)
 
 		P(&w);
 		disp_write_start();
-		milli_delay(slices * TIMESLICE);
+		//milli_delay(slices * TIMESLICE);
+		for (int i = 0; i < slices; i++)
+		{
+			disp_writing();
+			milli_delay(TIMESLICE);
+		}
 		disp_write_end();
 		V(&w);
 
@@ -245,9 +304,9 @@ void ReadA()
 	while (1)
 	{
 		read(2);
-		if (mode == 0)
+		p_proc_ready->hasWorked = 1;
+		while (p_proc_ready->hasWorked == 1)
 		{
-			//delay_milli_seconds(50);
 		}
 	}
 }
@@ -260,9 +319,9 @@ void ReadB()
 	while (1)
 	{
 		read(3);
-		if (mode == 0)
+		p_proc_ready->hasWorked = 1;
+		while (p_proc_ready->hasWorked == 1)
 		{
-			//delay_milli_seconds(50);
 		}
 	}
 }
@@ -275,9 +334,9 @@ void ReadC()
 	while (1)
 	{
 		read(3);
-		if (mode == 0)
+		p_proc_ready->hasWorked = 1;
+		while (p_proc_ready->hasWorked == 1)
 		{
-			//delay_milli_seconds(50);
 		}
 	}
 }
@@ -290,6 +349,10 @@ void WriteD()
 	while (1)
 	{
 		write(3);
+		p_proc_ready->hasWorked = 1;
+		while (p_proc_ready->hasWorked == 1)
+		{
+		}
 	}
 }
 
@@ -301,6 +364,10 @@ void WriteE()
 	while (1)
 	{
 		write(4);
+		p_proc_ready->hasWorked = 1;
+		while (p_proc_ready->hasWorked == 1)
+		{
+		}
 	}
 }
 
@@ -315,17 +382,17 @@ void F()
 		{
 			if (readCount != 0)
 			{
-				disp_int(readCount);
-				disp_str(" process is reading\n");
+				disp_int(readCount - nr_readers.size); //真正在读的进程要扣去已经申请到了读，但是没有申请到读人数上限的进程
+				disp_str(" process is reading");
 			}
 			else if (writeCount != 0)
 			{
-				disp_int(writeCount);
-				disp_str(" process is writing\n");
+				disp_int(writeCount - w.size);
+				disp_str(" process is writing");
 			}
 			else
 			{
-				disp_str("neither process is writing nor writing!\n");
+				disp_str("neither process is writing nor writing!");
 			}
 
 			isBlockedF = 1;

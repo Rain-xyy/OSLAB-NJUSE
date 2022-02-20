@@ -17,21 +17,39 @@
  *======================================================================*/
 PUBLIC void schedule()
 {
+	if (ticks - lastTicks >= 100)
+	{
+		lastTicks = ticks;
+		p_proc_ready = proc_table + NR_TASKS - 1; //选中F进程
+		isBlockedF = 0;
+		return;
+	}
+
 	PROCESS *p;
 
 	if (schedulable_queue_size == 0)
 	{
 		disp_str("no process is schedulable\n");
-		while (1)
-		{
-		}
 	}
 	else
 	{
-		int process = schedulable_queue[0];
+		if (!numOfNotWorked())
+		{
+			reWork();
+		}
+
+		do
+		{
+			int process = schedulable_queue[0];
+			p_proc_ready = proc_table + process;
+			remove(0);	   //删除
+			push(process); //移到队末
+		} while (p_proc_ready->hasWorked == 1);
+
+		/* int process = schedulable_queue[0];
 		p_proc_ready = proc_table + process;
 		remove(0);	   //删除
-		push(process); //移到队末
+		push(process); //移到队末 */
 	}
 }
 

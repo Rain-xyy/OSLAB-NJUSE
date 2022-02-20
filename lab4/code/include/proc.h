@@ -40,6 +40,7 @@ typedef struct s_proc
 	int sleep_time;
 	int isWaiting;
 	int color;
+	int hasWorked;
 	/* 	int timeSlice;	
  */
 	u32 pid;		 /* process id passed in from MM */

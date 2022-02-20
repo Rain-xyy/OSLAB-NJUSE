@@ -1,0 +1,4 @@
+ToolSet: 15.0 (local)@D:\VisualStudio2017\vs
+Options: 
+
+Options:
